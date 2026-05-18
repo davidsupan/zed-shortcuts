@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zed Essentials — Shortcuts to Remember</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg: #1b1d23;
+    --panel: #232730;
+    --text: #e6e8ee;
+    --muted: #8b93a7;
+    --accent: #7aa2f7;
+    --accent-2: #bb9af7;
+    --key-bg: #3a4150;
+    --key-border: #4a5366;
+    --border: #353a47;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafbfd;
+      --panel: #ffffff;
+      --text: #1a1d24;
+      --muted: #5a6378;
+      --accent: #3a5fcd;
+      --accent-2: #7a4fcf;
+      --key-bg: #eef0f5;
+      --key-border: #c8cdd9;
+      --border: #e1e4eb;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font: 13.5px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; }
+  header { padding: 20px 28px 4px; }
+  h1 { font-size: 20px; margin: 0 0 4px; font-weight: 700; }
+  header p { color: var(--muted); margin: 0 0 4px; font-size: 12.5px; }
+  header a { color: var(--muted); }
+  main {
+    padding: 12px 24px 30px;
+    columns: 360px 3;
+    column-gap: 22px;
+  }
+  .section {
+    break-inside: avoid;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px 10px;
+    margin: 0 0 14px;
+  }
+  .section.vim { border-left: 3px solid var(--accent-2); }
+  .section h2 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .section.vim h2 { color: var(--accent-2); }
+  .row { display: flex; gap: 10px; padding: 4px 0; align-items: baseline; border-top: 1px dashed transparent; }
+  .row + .row { border-top-color: var(--border); }
+  .kcell { flex: 0 0 auto; min-width: 110px; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .dcell { flex: 1 1 auto; }
+  .label { color: var(--text); }
+  .note { display: block; color: var(--muted); font-size: 11.5px; margin-top: 1px; line-height: 1.35; }
+  .kbd {
+    display: inline-block; padding: 1px 6px; margin: 1px 1px; border-radius: 5px;
+    background: var(--key-bg); border: 1px solid var(--key-border); border-bottom-width: 2px;
+    font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+    min-width: 16px; text-align: center;
+  }
+  .kbd.mod { color: var(--accent-2); }
+  .seq + .seq-sep { color: var(--muted); font-size: 10.5px; margin: 0 4px; }
+  .seq-sep + .seq { }
+  .vim-divider {
+    column-span: all;
+    text-align: center;
+    margin: 6px 0 14px;
+    color: var(--accent-2);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .vim-divider span {
+    display: inline-block;
+    padding: 0 14px;
+    position: relative;
+  }
+  .vim-divider span::before, .vim-divider span::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 80px;
+    height: 1px;
+    background: var(--border);
+  }
+  .vim-divider span::before { right: 100%; }
+  .vim-divider span::after { left: 100%; }
+  footer { padding: 6px 28px 28px; color: var(--muted); font-size: 11.5px; text-align: center; }
+  @media print {
+    @page { size: Letter landscape; margin: 0.35in 0.35in 0.3in; }
+    html, body { background: #fff; color: #000; font-size: 9.5px; line-height: 1.32; }
+    header { padding: 0 0 4px; }
+    header h1 { font-size: 14px; margin: 0; }
+    header p { font-size: 9px; margin: 0; }
+    header p:nth-of-type(2) { display: none; }
+    main { columns: 3; column-gap: 12px; padding: 0; }
+    .section {
+      break-inside: avoid;
+      border: 1px solid #bcbcbc;
+      border-radius: 6px;
+      padding: 5px 8px 4px;
+      margin: 0 0 6px;
+      background: #fff;
+    }
+    .section.vim { border-left: 2px solid #555; }
+    .section h2 { font-size: 9px; margin: 0 0 3px; color: #000; letter-spacing: 0.5px; }
+    .section.vim h2 { color: #000; }
+    .row { padding: 1px 0; gap: 6px; }
+    .row + .row { border-top-color: #e0e0e0; }
+    .kcell { min-width: 78px; }
+    .note { font-size: 8.5px; margin-top: 0; line-height: 1.25; color: #555; }
+    .label { color: #000; }
+    .kbd {
+      background: #f3f3f3; border-color: #888; color: #000;
+      font-size: 9px; padding: 0 4px; border-bottom-width: 1px;
+      min-width: 12px; margin: 0 0.5px;
+    }
+    .kbd.mod { color: #000; }
+    .seq + .seq-sep { font-size: 8px; margin: 0 2px; color: #777; }
+    .vim-divider {
+      break-before: page;
+      column-span: all;
+      margin: 0 0 6px;
+      color: #000;
+      font-size: 9px;
+    }
+    .vim-divider span { padding: 0 8px; }
+    .vim-divider span::before, .vim-divider span::after {
+      width: 60px; background: #999;
+    }
+    footer { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zed Essentials</h1>
+  <p>Curated shortcuts worth memorizing · macOS · 132 entries · synced 2026-05-18</p>
+  <p>Full searchable reference: <a href="zed-cheatsheet.html">zed-cheatsheet.html</a></p>
+</header>
+<main>
+<section class="section">
+      <h2>Files &amp; Workspace</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">P</span></span></span></div>
+          <div class="dcell"><span class="label">Open file (fuzzy file finder)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">P</span></span></span></div>
+          <div class="dcell"><span class="label">Command palette</span><span class="note">your universal escape hatch — fuzzy search every action</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">N</span></span></span></div>
+          <div class="dcell"><span class="label">New file</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Open file/folder</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Open recent project</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">S</span></span></span></div>
+          <div class="dcell"><span class="label">Save</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">S</span></span></span></div>
+          <div class="dcell"><span class="label">Save all</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">W</span></span></span></div>
+          <div class="dcell"><span class="label">Close tab</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">T</span></span></span></div>
+          <div class="dcell"><span class="label">Reopen closed tab</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">⇥</span></span></span></div>
+          <div class="dcell"><span class="label">Next tab (tab switcher)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">⇥</span></span></span></div>
+          <div class="dcell"><span class="label">Previous tab</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">,</span></span></span></div>
+          <div class="dcell"><span class="label">Open settings</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">S</span></span></span></div>
+          <div class="dcell"><span class="label">Open keymap</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Panels &amp; Splits</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">B</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle left dock (project panel)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">R</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle right dock</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">J</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle bottom dock (terminal)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">E</span></span></span></div>
+          <div class="dcell"><span class="label">Focus project panel</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">B</span></span></span></div>
+          <div class="dcell"><span class="label">Focus outline panel</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">`</span></span></span></div>
+          <div class="dcell"><span class="label">New terminal</span><span class="note">(literal: ctrl-~ in keymap)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">\</span></span></span></div>
+          <div class="dcell"><span class="label">Split editor right</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">←</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane left</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">→</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane right</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">⇞</span></span></span></div>
+          <div class="dcell"><span class="label">Swap tab left</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">⇟</span></span></span></div>
+          <div class="dcell"><span class="label">Swap tab right</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">⎋</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle editor zoom (maximize pane)</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Code Navigation (LSP)</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">F12</span></span></span></div>
+          <div class="dcell"><span class="label">Go to definition</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">F12</span></span></span></div>
+          <div class="dcell"><span class="label">Go to implementation</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">F12</span></span></span></div>
+          <div class="dcell"><span class="label">Find all references</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">-</span></span></span></div>
+          <div class="dcell"><span class="label">Go back (navigation history)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">_</span></span></span></div>
+          <div class="dcell"><span class="label">Go forward</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Go to symbol in file (outline)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">G</span></span></span></div>
+          <div class="dcell"><span class="label">Go to line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Hover (show symbol info)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Signature help (in editor)</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Editing</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">F2</span></span></span></div>
+          <div class="dcell"><span class="label">Rename symbol</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">.</span></span></span></div>
+          <div class="dcell"><span class="label">Code actions / quick fix</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Format document</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">/</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle line comment</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd">↑</span></span></span></div>
+          <div class="dcell"><span class="label">Move line up</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd">↓</span></span></span></div>
+          <div class="dcell"><span class="label">Move line down</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">↓</span></span></span></div>
+          <div class="dcell"><span class="label">Duplicate line down</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd">⇥</span></span></span></div>
+          <div class="dcell"><span class="label">Accept edit prediction (Zeta) / show next</span><span class="note">yes, Alt+Tab — overrides OS app switcher in editor</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">→</span></span></span></div>
+          <div class="dcell"><span class="label">Accept next word of prediction</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">↓</span></span></span></div>
+          <div class="dcell"><span class="label">Accept next line of prediction</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Multi-cursor &amp; Selection</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Select next occurrence of word</span><span class="note">press repeatedly to add cursors</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">L</span></span></span></div>
+          <div class="dcell"><span class="label">Select all occurrences</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">↑</span></span></span></div>
+          <div class="dcell"><span class="label">Add cursor above</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">↓</span></span></span></div>
+          <div class="dcell"><span class="label">Add cursor below</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">→</span></span></span></div>
+          <div class="dcell"><span class="label">Expand selection to larger syntax node</span><span class="note">tree-sitter aware — grows by AST</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="shift">⇧</span><span class="kbd">←</span></span></span></div>
+          <div class="dcell"><span class="label">Shrink selection to smaller syntax node</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Find &amp; Search</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">F</span></span></span></div>
+          <div class="dcell"><span class="label">Find in current buffer</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">F</span></span></span></div>
+          <div class="dcell"><span class="label">Find in project</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="alt">⌥</span><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">F</span></span></span></div>
+          <div class="dcell"><span class="label">New search in folder (from project panel)</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>Git</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">F8</span></span></span></div>
+          <div class="dcell"><span class="label">Go to next hunk</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">F8</span></span></span></div>
+          <div class="dcell"><span class="label">Go to previous hunk</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">⌫</span></span></span></div>
+          <div class="dcell"><span class="label">Go to previous change</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">B</span></span></span></div>
+          <div class="dcell"><span class="label">Show git blame for line (hover)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd mod" title="cmd">⌘</span><span class="kbd">B</span></span></span></div>
+          <div class="dcell"><span class="label">Open recent branches</span></div>
+        </div></div>
+    </section><section class="section">
+      <h2>AI / Agent</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">?</span></span></span></div>
+          <div class="dcell"><span class="label">Toggle agent panel</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">↩</span></span></span></div>
+          <div class="dcell"><span class="label">Inline assist (rewrite/explain selection)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">&gt;</span></span></span></div>
+          <div class="dcell"><span class="label">Add selection to agent thread</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="cmd">⌘</span><span class="kbd">N</span></span></span></div>
+          <div class="dcell"><span class="label">New thread (when in agent panel)</span></div>
+        </div></div>
+    </section><div class="vim-divider"><span>Vim mode</span></div><section class="section vim">
+      <h2>Vim · Movement (normal mode)</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">H</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">J</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">K</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">L</span></span></span></div>
+          <div class="dcell"><span class="label">Left / Down / Up / Right</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">W</span></span></span></div>
+          <div class="dcell"><span class="label">Next word start</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">B</span></span></span></div>
+          <div class="dcell"><span class="label">Previous word start</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">E</span></span></span></div>
+          <div class="dcell"><span class="label">Next word end</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">0</span></span></span></div>
+          <div class="dcell"><span class="label">Beginning of line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">^</span></span></span></div>
+          <div class="dcell"><span class="label">First non-whitespace of line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">$</span></span></span></div>
+          <div class="dcell"><span class="label">End of line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">G</span></span></span></div>
+          <div class="dcell"><span class="label">Top of file</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">G</span></span></span></div>
+          <div class="dcell"><span class="label">Bottom of file (G)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">{</span></span></span></div>
+          <div class="dcell"><span class="label">Previous paragraph</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">}</span></span></span></div>
+          <div class="dcell"><span class="label">Next paragraph</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">%</span></span></span></div>
+          <div class="dcell"><span class="label">Matching bracket</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Half page down</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">U</span></span></span></div>
+          <div class="dcell"><span class="label">Half page up</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">Z</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">Z</span></span></span></div>
+          <div class="dcell"><span class="label">Center cursor on screen</span></div>
+        </div></div>
+    </section><section class="section vim">
+      <h2>Vim · Modes</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Insert before cursor</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">A</span></span></span></div>
+          <div class="dcell"><span class="label">Insert after cursor (append)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Insert at start of line (I)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">A</span></span></span></div>
+          <div class="dcell"><span class="label">Insert at end of line (A)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Open new line below</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Open new line above (O)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">V</span></span></span></div>
+          <div class="dcell"><span class="label">Visual (character) mode</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">V</span></span></span></div>
+          <div class="dcell"><span class="label">Visual line mode (V)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">V</span></span></span></div>
+          <div class="dcell"><span class="label">Visual block mode</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">⎋</span></span></span></div>
+          <div class="dcell"><span class="label">Back to normal mode</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">:</span></span></span></div>
+          <div class="dcell"><span class="label">Command palette (in vim normal)</span><span class="note">Zed maps : to the command palette</span></div>
+        </div></div>
+    </section><section class="section vim">
+      <h2>Vim · Editing</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">X</span></span></span></div>
+          <div class="dcell"><span class="label">Delete character under cursor</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">D</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Delete (cut) line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">D</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">W</span></span></span></div>
+          <div class="dcell"><span class="label">Delete to next word</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">C</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">C</span></span></span></div>
+          <div class="dcell"><span class="label">Change line (delete + insert)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">C</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">W</span></span></span></div>
+          <div class="dcell"><span class="label">Change to next word</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">Y</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">Y</span></span></span></div>
+          <div class="dcell"><span class="label">Yank (copy) line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">P</span></span></span></div>
+          <div class="dcell"><span class="label">Paste after cursor</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">P</span></span></span></div>
+          <div class="dcell"><span class="label">Paste before cursor (P)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">U</span></span></span></div>
+          <div class="dcell"><span class="label">Undo</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">R</span></span></span></div>
+          <div class="dcell"><span class="label">Redo</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">.</span></span></span></div>
+          <div class="dcell"><span class="label">Repeat last change</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">&gt;</span></span></span></div>
+          <div class="dcell"><span class="label">Indent (in visual) — operator in normal</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">&lt;</span></span></span></div>
+          <div class="dcell"><span class="label">Outdent</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">U</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">U</span></span></span></div>
+          <div class="dcell"><span class="label">Lowercase line</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">U</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">U</span></span></span></div>
+          <div class="dcell"><span class="label">Uppercase line</span></div>
+        </div></div>
+    </section><section class="section vim">
+      <h2>Vim · Search &amp; Replace</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">/</span></span></span></div>
+          <div class="dcell"><span class="label">Search forward</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">?</span></span></span></div>
+          <div class="dcell"><span class="label">Search backward</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">N</span></span></span></div>
+          <div class="dcell"><span class="label">Next match</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">N</span></span></span></div>
+          <div class="dcell"><span class="label">Previous match (N)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">*</span></span></span></div>
+          <div class="dcell"><span class="label">Search word under cursor (forward)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">#</span></span></span></div>
+          <div class="dcell"><span class="label">Search word under cursor (backward)</span></div>
+        </div></div>
+    </section><section class="section vim">
+      <h2>Vim · LSP &amp; Code Intelligence</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Go to definition</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">R</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">R</span></span></span></div>
+          <div class="dcell"><span class="label">Find all references</span><span class="note">Zed&#x27;s grr — references</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">R</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">N</span></span></span></div>
+          <div class="dcell"><span class="label">Rename symbol</span><span class="note">grn — rename</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">R</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">A</span></span></span></div>
+          <div class="dcell"><span class="label">Code actions</span><span class="note">gra — actions</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">R</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Go to implementation</span><span class="note">gri — implementation</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">S</span></span></span></div>
+          <div class="dcell"><span class="label">Symbol outline</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">G</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">A</span></span></span></div>
+          <div class="dcell"><span class="label">Select all matches of word</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">K</span></span></span></div>
+          <div class="dcell"><span class="label">Hover (show symbol info)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">[</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">C</span></span></span></div>
+          <div class="dcell"><span class="label">Previous hunk</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">]</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">C</span></span></span></div>
+          <div class="dcell"><span class="label">Next hunk</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">[</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Previous diagnostic</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd">]</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">D</span></span></span></div>
+          <div class="dcell"><span class="label">Next diagnostic</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Jump back (navigation)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">I</span></span></span></div>
+          <div class="dcell"><span class="label">Jump forward</span></div>
+        </div></div>
+    </section><section class="section vim">
+      <h2>Vim · Windows / Panes</h2>
+      <div class="rows">
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">V</span></span></span></div>
+          <div class="dcell"><span class="label">Split right (vertical split)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">S</span></span></span></div>
+          <div class="dcell"><span class="label">Split down (horizontal split)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">H</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane left</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">L</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane right</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">J</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane below</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">K</span></span></span></div>
+          <div class="dcell"><span class="label">Focus pane above</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="ctrl">⌃</span><span class="kbd">W</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd">O</span></span></span></div>
+          <div class="dcell"><span class="label">Close other panes (only this one)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">Z</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">Z</span></span></span></div>
+          <div class="dcell"><span class="label">Save &amp; close (ZZ)</span></div>
+        </div>
+        <div class="row">
+          <div class="kcell"><span class="chord-group"><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">Z</span></span><span class="seq-sep">then</span><span class="seq"><span class="kbd mod" title="shift">⇧</span><span class="kbd">Q</span></span></span></div>
+          <div class="dcell"><span class="label">Close without saving (ZQ)</span></div>
+        </div></div>
+    </section>
+</main>
+<footer>Source: <a href="https://github.com/zed-industries/zed/tree/main/assets/keymaps">zed-industries/zed · assets/keymaps</a></footer>
+</body>
+</html>
