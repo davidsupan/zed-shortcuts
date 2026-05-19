@@ -1,9 +1,53 @@
 #!/usr/bin/env python3
-"""Build a curated 'essentials' Zed cheatsheet — hand-picked shortcuts."""
-import datetime, html as html_lib
+"""Build curated Zed essentials cheatsheets for each supported platform."""
+import argparse
+import datetime
+import html as html_lib
+import subprocess
+import sys
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parent / 'zed-essentials.html'
+HERE = Path(__file__).resolve().parent
+PLATFORMS = {
+    'macos': {
+        'label': 'macOS',
+        'output': 'zed-essentials-macos.html',
+        'cheatsheet': 'zed-cheatsheet-macos.html',
+        'mod_symbols': {'cmd': '⌘', 'shift': '⇧', 'alt': '⌥', 'ctrl': '⌃', 'fn': 'fn'},
+    },
+    'windows': {
+        'label': 'Windows',
+        'output': 'zed-essentials-windows.html',
+        'cheatsheet': 'zed-cheatsheet-windows.html',
+        'mod_symbols': {'cmd': 'Win', 'shift': 'Shift', 'alt': 'Alt', 'ctrl': 'Ctrl', 'fn': 'Fn'},
+    },
+    'linux': {
+        'label': 'Linux',
+        'output': 'zed-essentials-linux.html',
+        'cheatsheet': 'zed-cheatsheet-linux.html',
+        'mod_symbols': {'cmd': 'Super', 'shift': 'Shift', 'alt': 'Alt', 'ctrl': 'Ctrl', 'fn': 'Fn'},
+    },
+}
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument(
+    '--platform',
+    choices=[*PLATFORMS.keys(), 'all'],
+    default='all',
+    help='Platform to build. Defaults to all essentials sheets.',
+)
+args = parser.parse_args()
+if args.platform == 'all':
+    for platform_id in PLATFORMS:
+        subprocess.run(
+            [sys.executable, str(Path(__file__).resolve()), '--platform', platform_id],
+            check=True,
+        )
+    raise SystemExit(0)
+
+PLATFORM_ID = args.platform
+PLATFORM = PLATFORMS[PLATFORM_ID]
+OUT = HERE / PLATFORM['output']
 
 # Each entry: (keys, label, note_or_empty)
 # 'keys' uses the same Zed token format so the renderer formats it consistently.
@@ -87,6 +131,50 @@ SECTIONS = [
         ("cmd-n",        "New thread (when in agent panel)", ""),
     ]),
 ]
+
+PLATFORM_KEY_OVERRIDES = {
+    'windows': {
+        "Open file/folder": "ctrl-k ctrl-o",
+        "Open recent project": "ctrl-r",
+        "Save all": "ctrl-k s",
+        "Toggle right dock": "ctrl-alt-b",
+        "Go to implementation": "ctrl-f12",
+        "Go forward": "alt-right",
+        "Format document": "shift-alt-f",
+        "Accept edit prediction (Zeta) / show next": "alt-]",
+        "Accept next word of prediction": "alt-k",
+        "Accept next line of prediction": "alt-j",
+        "Expand selection to larger syntax node": "shift-alt-right",
+        "Shrink selection to smaller syntax node": "shift-alt-left",
+        "New search in folder (from project panel)": "ctrl-k ctrl-shift-f",
+        "Open recent branches": "shift-alt-b",
+        "Toggle agent panel": "ctrl-shift-/",
+        "Add selection to agent thread": "ctrl-shift-.",
+    },
+    'linux': {
+        "Open file/folder": "ctrl-k ctrl-o",
+        "Open recent project": "ctrl-r",
+        "Toggle right dock": "ctrl-alt-b",
+        "Go forward": "ctrl-alt-_",
+        "Accept edit prediction (Zeta) / show next": "alt-]",
+        "Accept next word of prediction": "alt-k",
+        "Accept next line of prediction": "alt-j",
+        "Add cursor above": "shift-alt-up",
+        "Add cursor below": "shift-alt-down",
+        "Expand selection to larger syntax node": "alt-shift-right",
+        "Shrink selection to smaller syntax node": "alt-shift-left",
+        "Open recent branches": "alt-ctrl-shift-b",
+    },
+}
+
+PLATFORM_NOTE_OVERRIDES = {
+    'windows': {
+        "Accept edit prediction (Zeta) / show next": "uses Alt+] on Windows to avoid the OS app switcher",
+    },
+    'linux': {
+        "Accept edit prediction (Zeta) / show next": "uses Alt+] on Linux to avoid common window manager shortcuts",
+    },
+}
 
 # Vim section: most useful default-vim bindings. These are part of Zed's vim mode and
 # only fire when vim mode is enabled.
@@ -175,10 +263,39 @@ VIM_SECTIONS = [
     ]),
 ]
 
-ALL = SECTIONS + VIM_SECTIONS
+def fallback_platform_keys(keys):
+    if PLATFORM_ID == 'macos':
+        return keys
+    tokens = []
+    for chord in keys.split():
+        parts = ['ctrl' if part == 'cmd' else part for part in chord.split('-')]
+        deduped = []
+        for part in parts:
+            if part not in deduped:
+                deduped.append(part)
+        tokens.append('-'.join(deduped))
+    return ' '.join(tokens)
+
+
+def platform_sections(sections):
+    key_overrides = PLATFORM_KEY_OVERRIDES.get(PLATFORM_ID, {})
+    note_overrides = PLATFORM_NOTE_OVERRIDES.get(PLATFORM_ID, {})
+    translated = []
+    for title, rows in sections:
+        translated_rows = []
+        for keys, label, note in rows:
+            platform_keys = key_overrides.get(label, fallback_platform_keys(keys))
+            platform_note = note_overrides.get(label, note)
+            translated_rows.append((platform_keys, label, platform_note))
+        translated.append((title, translated_rows))
+    return translated
+
+
+PLATFORM_SECTIONS = platform_sections(SECTIONS)
+ALL = PLATFORM_SECTIONS + VIM_SECTIONS
 
 # --- Renderer ---
-MOD_SYMS = {'cmd':'⌘','shift':'⇧','alt':'⌥','ctrl':'⌃','fn':'fn'}
+MOD_SYMS = PLATFORM['mod_symbols']
 KEY_SYMS = {
     'enter':'↩','tab':'⇥','backspace':'⌫','delete':'⌦','escape':'⎋',
     'up':'↑','down':'↓','left':'←','right':'→',
@@ -235,9 +352,9 @@ def section_html(title, rows, is_vim=False):
       <div class="rows">{''.join(lis)}</div>
     </section>'''
 
-generated = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+generated = datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d')
 
-body_sections = ''.join(section_html(t, r, is_vim=False) for t, r in SECTIONS)
+body_sections = ''.join(section_html(t, r, is_vim=False) for t, r in PLATFORM_SECTIONS)
 body_sections += '<div class="vim-divider"><span>Vim mode</span></div>'
 body_sections += ''.join(section_html(t, r, is_vim=True) for t, r in VIM_SECTIONS)
 
@@ -394,8 +511,8 @@ doc = f"""<!doctype html>
 <body>
 <header>
   <h1>Zed Essentials</h1>
-  <p>Curated shortcuts worth memorizing · macOS · {total} entries · synced {generated}</p>
-  <p>Full searchable reference: <a href="zed-cheatsheet.html">zed-cheatsheet.html</a></p>
+  <p>Curated shortcuts worth memorizing · {PLATFORM['label']} · {total} entries · synced {generated}</p>
+  <p>Full searchable reference: <a href="{PLATFORM['cheatsheet']}">{PLATFORM['cheatsheet']}</a></p>
 </header>
 <main>
 {body_sections}
@@ -405,5 +522,5 @@ doc = f"""<!doctype html>
 </html>
 """
 
-OUT.write_text(doc)
+OUT.write_text(doc, encoding='utf-8')
 print(f"Wrote {OUT} ({len(doc):,} bytes, {total} entries)")

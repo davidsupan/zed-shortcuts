@@ -1,15 +1,81 @@
 #!/usr/bin/env python3
-"""Generate a single-file Zed shortcuts cheatsheet from Zed's default keymaps."""
-import json, re, datetime, html
+"""Generate single-file Zed shortcut cheatsheets from Zed's default keymaps."""
+import argparse
+import datetime
+import html as html_lib
+import json
+import re
+import subprocess
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 KEYMAPS = HERE / 'keymaps'
+UPSTREAM_KEYMAPS = 'https://github.com/zed-industries/zed/blob/main/assets/keymaps'
+PLATFORMS = {
+    'macos': {
+        'label': 'macOS',
+        'keymap': 'default-macos.json',
+        'output': 'zed-cheatsheet-macos.html',
+        'example': 'cmd-p',
+        'mod_labels': {'cmd': '⌘', 'shift': '⇧', 'alt': '⌥', 'ctrl': '⌃', 'fn': 'fn'},
+    },
+    'windows': {
+        'label': 'Windows',
+        'keymap': 'default-windows.json',
+        'output': 'zed-cheatsheet-windows.html',
+        'example': 'ctrl-p',
+        'mod_labels': {'cmd': 'Win', 'shift': 'Shift', 'alt': 'Alt', 'ctrl': 'Ctrl', 'fn': 'Fn'},
+    },
+    'linux': {
+        'label': 'Linux',
+        'keymap': 'default-linux.json',
+        'output': 'zed-cheatsheet-linux.html',
+        'example': 'ctrl-p',
+        'mod_labels': {'cmd': 'Super', 'shift': 'Shift', 'alt': 'Alt', 'ctrl': 'Ctrl', 'fn': 'Fn'},
+    },
+}
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument(
+    '--platform',
+    choices=[*PLATFORMS.keys(), 'all'],
+    default='all',
+    help='Platform to build. Defaults to all platform cheatsheets.',
+)
+args = parser.parse_args()
+if args.platform == 'all':
+    for platform_id in PLATFORMS:
+        subprocess.run(
+            [sys.executable, str(Path(__file__).resolve()), '--platform', platform_id],
+            check=True,
+        )
+    raise SystemExit(0)
+
+PLATFORM_ID = args.platform
+PLATFORM = PLATFORMS[PLATFORM_ID]
 SOURCES = [
-    ('default', KEYMAPS / 'default-macos.json'),
+    ('default', KEYMAPS / PLATFORM['keymap']),
     ('vim', KEYMAPS / 'vim.json'),
 ]
-OUT = HERE / 'zed-cheatsheet.html'
+OUT = HERE / PLATFORM['output']
+MOD_ORDER = ['ctrl', 'alt', 'shift', 'cmd', 'fn']
+KEY_SYMS = {
+    'enter': '↩',
+    'tab': '⇥',
+    'backspace': '⌫',
+    'delete': '⌦',
+    'escape': '⎋',
+    'up': '↑',
+    'down': '↓',
+    'left': '←',
+    'right': '→',
+    'pageup': '⇞',
+    'pagedown': '⇟',
+    'home': '↖',
+    'end': '↘',
+    'space': '␣',
+}
 
 def strip_comments(s):
     out = []
@@ -37,9 +103,107 @@ def strip_comments(s):
                 out.append(c); i += 1
     return ''.join(out)
 
+
+def humanize_action(action):
+    namespace, _, name = action.partition('::')
+    if not name:
+        name = namespace
+        namespace = ''
+    pretty = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', name)
+    pretty = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', pretty)
+    namespace = namespace.replace('_', ' ').title()
+    return f'{namespace}: {pretty}' if namespace else pretty
+
+
+def parse_chord(chord):
+    parts = chord.split('-')
+    mods = []
+    i = 0
+    while i < len(parts) - 1 and parts[i] in PLATFORM['mod_labels']:
+        mods.append(parts[i])
+        i += 1
+    key = '-'.join(parts[i:]) or '-'
+    return mods, key
+
+
+def key_label(key):
+    lower = key.lower()
+    if lower in KEY_SYMS:
+        return KEY_SYMS[lower]
+    if len(key) == 1:
+        return key.upper()
+    if lower.startswith('f') and key[1:].isdigit():
+        return key.upper()
+    return key
+
+
+def chord_html(chord):
+    mods, key = parse_chord(chord)
+    parts = []
+    for mod in MOD_ORDER:
+        if mod in mods:
+            label = PLATFORM['mod_labels'][mod]
+            parts.append(f'<span class="kbd mod" title="{mod}">{html_lib.escape(label)}</span>')
+    parts.append(f'<span class="kbd">{html_lib.escape(key_label(key))}</span>')
+    return ''.join(parts)
+
+
+def keys_html(keys):
+    chords = keys.split()
+    rendered = []
+    for i, chord in enumerate(chords):
+        if i:
+            rendered.append('<span class="print-seq-sep">then</span>')
+        rendered.append(f'<span class="seq">{chord_html(chord)}</span>')
+    return ''.join(rendered)
+
+
+def build_print_sheet(bindings):
+    groups = {}
+    for binding in bindings:
+        key = (binding['source'], binding['context'])
+        groups.setdefault(key, []).append(binding)
+
+    sections = []
+    rows_per_section = 22
+    added_vim_divider = False
+    for (source, context), rows in groups.items():
+        source_label = 'Vim' if source == 'vim' else 'Default'
+        if source == 'vim' and not added_vim_divider:
+            sections.append('<div class="print-divider"><span>Vim mode</span></div>')
+            added_vim_divider = True
+        context_label = context or 'Global'
+        chunks = [rows[i:i + rows_per_section] for i in range(0, len(rows), rows_per_section)]
+        for chunk_index, chunk in enumerate(chunks):
+            suffix = f' ({chunk_index + 1}/{len(chunks)})' if len(chunks) > 1 else ''
+            title = f'{source_label} · {context_label}{suffix}'
+            row_html = []
+            for binding in chunk:
+                args = ''
+                if binding['args'] is not None:
+                    args = (
+                        f'<span class="print-note">'
+                        f'{html_lib.escape(json.dumps(binding["args"], ensure_ascii=False, separators=(",", ":")))}'
+                        f'</span>'
+                    )
+                row_html.append(
+                    '<div class="print-row">'
+                    f'<div class="print-keys">{keys_html(binding["keys"])}</div>'
+                    f'<div class="print-action">{html_lib.escape(humanize_action(binding["action"]))}{args}</div>'
+                    '</div>'
+                )
+            classes = 'print-section vim' if source == 'vim' else 'print-section'
+            sections.append(
+                f'<section class="{classes}">'
+                f'<h2>{html_lib.escape(title)}</h2>'
+                f'{"".join(row_html)}'
+                '</section>'
+            )
+    return ''.join(sections)
+
 bindings = []
 for source, path in SOURCES:
-    raw = open(str(path)).read()
+    raw = path.read_text(encoding='utf-8')
     cleaned = strip_comments(raw)
     cleaned = re.sub(r',(\s*[}\]])', r'\1', cleaned)
     data = json.loads(cleaned)
@@ -62,8 +226,14 @@ for source, path in SOURCES:
                 'source': source,
             })
 
-payload = json.dumps(bindings, separators=(',', ':'))
-generated = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+payload = json.dumps(bindings, ensure_ascii=False, separators=(',', ':'))
+print_sheet = build_print_sheet(bindings)
+generated = datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d')
+platform_nav = ' '.join(
+    f'<a class="btn{" active" if platform_id == PLATFORM_ID else ""}" href="{meta["output"]}">{meta["label"]}</a>'
+    for platform_id, meta in PLATFORMS.items()
+)
+default_keymap_url = f'{UPSTREAM_KEYMAPS}/{PLATFORM["keymap"]}'
 
 html_doc = r"""<!doctype html>
 <html lang="en">
@@ -124,6 +294,8 @@ html_doc = r"""<!doctype html>
   .btn:hover { background: var(--panel-2); }
   .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn.ghost { background: transparent; }
+  .platform-nav { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .platform-nav .btn { text-decoration: none; }
   select.btn { appearance: none; padding-right: 24px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%; background-size: 5px 5px; background-repeat: no-repeat; }
   .meta { color: var(--muted); font-size: 12px; padding: 6px 20px 0; }
   .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
@@ -157,20 +329,136 @@ html_doc = r"""<!doctype html>
   .badge.vim { background: rgba(187, 154, 247, 0.18); color: var(--accent-2); border: 1px solid rgba(187, 154, 247, 0.4); }
   footer { color: var(--muted); font-size: 11.5px; padding: 18px 20px 30px; text-align: center; }
   footer a { color: var(--muted); }
+  .print-sheet { display: none; }
   kbd.live {
     display: inline-block; padding: 3px 8px; margin: 1px 2px; border-radius: 6px;
     background: var(--accent); color: #fff; border: 1px solid var(--accent);
     font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   .chord-sep { color: var(--muted); margin: 0 4px; }
+  @media print {
+    @page { size: Letter landscape; margin: 0.35in 0.35in 0.3in; }
+    html, body {
+      background: #fff;
+      color: #000;
+      font: 8.5px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    }
+    header {
+      position: static;
+      background: #fff;
+      border-bottom: 1px solid #999;
+      padding: 0 0 4px;
+      margin: 0 0 3px;
+    }
+    h1 { font-size: 14px; margin: 0; font-weight: 700; }
+    h1 small { color: #444; font-size: 9px; margin-left: 4px; }
+    .controls, .hint, footer, #empty, main, .count { display: none; }
+    .print-sheet {
+      display: block;
+      column-count: 3;
+      column-gap: 12px;
+      padding: 0;
+    }
+    .print-section {
+      break-inside: avoid;
+      background: #fff;
+      border: 1px solid #bcbcbc;
+      border-radius: 6px;
+      padding: 5px 8px 4px;
+      margin: 0 0 6px;
+    }
+    .print-section.vim { border-left: 2px solid #555; }
+    .print-divider {
+      break-before: page;
+      column-span: all;
+      color: #000;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin: 0 0 6px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .print-divider span {
+      display: inline-block;
+      padding: 0 8px;
+      position: relative;
+    }
+    .print-divider span::before,
+    .print-divider span::after {
+      background: #999;
+      content: '';
+      height: 1px;
+      position: absolute;
+      top: 50%;
+      width: 60px;
+    }
+    .print-divider span::before { right: 100%; }
+    .print-divider span::after { left: 100%; }
+    .print-section h2 {
+      margin: 0 0 3px;
+      color: #000;
+      font-size: 8px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.45px;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+    .print-row {
+      display: grid;
+      grid-template-columns: minmax(58px, 32%) 1fr;
+      gap: 6px;
+      align-items: baseline;
+      break-inside: avoid;
+      padding: 1px 0;
+    }
+    .print-row + .print-row { border-top: 1px solid #e0e0e0; }
+    .print-keys {
+      white-space: normal;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .print-action {
+      color: #000;
+      font-size: 7.8px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+    .print-note {
+      display: block;
+      color: #555;
+      font-size: 6.8px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .print-seq-sep {
+      color: #777;
+      font-size: 6.5px;
+      margin: 0 2px;
+    }
+    .kbd {
+      background: #f3f3f3;
+      border-color: #888;
+      color: #000;
+      font-size: 7.5px;
+      line-height: 1.2;
+      min-width: 10px;
+      padding: 0 3px;
+      margin: 0 0.5px;
+      border-radius: 3px;
+      border-bottom-width: 1px;
+    }
+    .kbd.mod { color: #000; }
+    mark { background: transparent; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>Zed Shortcuts <small>macOS · default + vim · __COUNT__ bindings · synced __DATE__</small></h1>
+  <h1>Zed Shortcuts <small>__PLATFORM_LABEL__ · default + vim · __COUNT__ bindings · synced __DATE__</small></h1>
   <div class="controls">
     <div class="search-wrap">
-      <input id="q" type="text" placeholder="Search by action, key, or context (e.g. 'duplicate line', 'cmd-p', 'editor')" autocomplete="off" autofocus>
+      <input id="q" type="text" placeholder="Search by action, key, or context (e.g. 'duplicate line', '__EXAMPLE_KEY__', 'editor')" autocomplete="off" autofocus>
       <div id="capture-display" tabindex="0"><span class="placeholder">Press a shortcut… (Esc to clear)</span></div>
     </div>
     <button id="capture-btn" class="btn" title="Toggle key-capture mode">⌨︎ Capture keys</button>
@@ -184,6 +472,7 @@ html_doc = r"""<!doctype html>
       <option value="">All contexts</option>
     </select>
     <button id="clear-btn" class="btn ghost" title="Reset filters">Reset</button>
+    <span class="platform-nav" aria-label="Platform">__PLATFORM_NAV__</span>
   </div>
   <div class="hint" id="hint">Tip: type to search. Click <b>Capture keys</b> then press a shortcut to look it up.</div>
 </header>
@@ -197,8 +486,12 @@ html_doc = r"""<!doctype html>
   </table>
   <div id="empty" class="empty" hidden>No bindings match.</div>
 </main>
+<section class="print-sheet" aria-label="Printable shortcuts">
+__PRINT_SHEET__
+</section>
 <footer>
-  Data from <a href="https://github.com/zed-industries/zed/blob/main/assets/keymaps/default-macos.json" target="_blank" rel="noopener">zed/assets/keymaps/default-macos.json</a>.
+  Data from <a href="__DEFAULT_KEYMAP_URL__" target="_blank" rel="noopener">zed/assets/keymaps/__DEFAULT_KEYMAP__</a>
+  and <a href="https://github.com/zed-industries/zed/blob/main/assets/keymaps/vim.json" target="_blank" rel="noopener">vim.json</a>.
 </footer>
 
 <script id="data" type="application/json">__PAYLOAD__</script>
@@ -207,7 +500,7 @@ html_doc = r"""<!doctype html>
   const RAW = JSON.parse(document.getElementById('data').textContent);
 
   // ---------- Key formatting ----------
-  const MOD_SYMS = { cmd: '⌘', shift: '⇧', alt: '⌥', ctrl: '⌃', fn: 'fn' };
+  const MOD_SYMS = __MOD_LABELS__;
   const KEY_SYMS = {
     enter: '↩', tab: '⇥', backspace: '⌫', delete: '⌦', escape: '⎋',
     up: '↑', down: '↓', left: '←', right: '→',
@@ -556,6 +849,13 @@ html_doc = r"""<!doctype html>
 html_doc = html_doc.replace('__COUNT__', str(len(bindings)))
 html_doc = html_doc.replace('__DATE__', generated)
 html_doc = html_doc.replace('__PAYLOAD__', payload)
+html_doc = html_doc.replace('__PRINT_SHEET__', print_sheet)
+html_doc = html_doc.replace('__PLATFORM_LABEL__', PLATFORM['label'])
+html_doc = html_doc.replace('__EXAMPLE_KEY__', PLATFORM['example'])
+html_doc = html_doc.replace('__PLATFORM_NAV__', platform_nav)
+html_doc = html_doc.replace('__DEFAULT_KEYMAP_URL__', default_keymap_url)
+html_doc = html_doc.replace('__DEFAULT_KEYMAP__', PLATFORM['keymap'])
+html_doc = html_doc.replace('__MOD_LABELS__', json.dumps(PLATFORM['mod_labels'], ensure_ascii=False))
 
-OUT.write_text(html_doc)
+OUT.write_text(html_doc, encoding='utf-8')
 print(f"Wrote {OUT} ({len(html_doc):,} bytes, {len(bindings)} bindings)")
